@@ -29,14 +29,14 @@ export default function Leads() {
           className="bg-indigo-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-800 transition-colors flex items-center"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Add New Lead
+          Add New Shop
         </button>
       </div>
 
       {showAddForm && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-slate-900">Add New Lead</h2>
+            <h2 className="text-lg font-bold text-slate-900">Add New Shop</h2>
             <button onClick={() => setShowAddForm(false)} className="text-slate-400 hover:text-slate-600">Close</button>
           </div>
           <form className="grid sm:grid-cols-2 md:grid-cols-3 gap-6" onSubmit={(e) => { e.preventDefault(); setShowAddForm(false); }}>
@@ -49,12 +49,16 @@ export default function Leads() {
               <input required type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="e.g. Rahul Sharma" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-700">Mobile Number</label>
-              <input required type="tel" className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="10-digit number" />
+              <label className="text-sm font-medium text-slate-700">WhatsApp Number</label>
+              <input required type="tel" className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="10-digit WhatsApp number" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Area</label>
               <input required type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm" placeholder="e.g. Baner" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">Referral Code (Partner Code)</label>
+              <input required type="text" className="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-indigo-500 text-sm font-mono uppercase" placeholder="e.g. NX-VIJAY2024" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-slate-700">Initial Status</label>
@@ -65,7 +69,7 @@ export default function Leads() {
             </div>
             <div className="flex items-end">
               <button type="submit" className="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
-                Save Lead
+                Save Shop
               </button>
             </div>
           </form>

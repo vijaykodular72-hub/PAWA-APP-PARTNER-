@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { 
   ArrowRight, 
@@ -22,8 +23,21 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import welcomeKitImg from '../assets/images/welcome_kit_reward_1783078021840.jpg';
+import tshirtImg from '../assets/images/tshirt_reward_1783078036289.jpg';
+import tabletImg from '../assets/images/tablet_reward_1783078050167.jpg';
+import laptopImg from '../assets/images/laptop_reward_1783078062332.jpg';
+import carImg from '../assets/images/car_reward_1783078073354.jpg';
 
 export default function GrowthPartnerPage() {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
       {/* Navigation */}
@@ -277,6 +291,107 @@ export default function GrowthPartnerPage() {
         </div>
       </section>
 
+      {/* Milestone Rewards Section (Poster Banner Style) */}
+      <section className="py-24 bg-slate-950 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Glow Effects */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-amber-500/20 blur-[120px] rounded-full pointer-events-none" />
+        
+        <div className="max-w-[1600px] mx-auto relative z-10">
+          <div className="text-center mb-16 max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-2 py-2 px-6 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold tracking-wider uppercase text-sm mb-6 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+              <Award className="w-5 h-5" />
+              Growth Partner Rewards
+            </div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
+              Hit Targets. <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-500">Unlock Premium Rewards.</span>
+            </h2>
+            <p className="text-lg md:text-xl text-slate-300 font-medium max-w-3xl mx-auto">
+              Only active, revenue-generating shops count. Achieve your onboarding milestones and get rewarded with premium lifestyle and business upgrades, on top of your regular commissions!
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
+            {/* Reward 1 */}
+            <div className="relative bg-slate-900 rounded-3xl p-5 border border-slate-700/50 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-300 group flex flex-col">
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 font-black px-4 py-2 rounded-xl shadow-lg transform rotate-3 scale-110 z-20">
+                26 SHOPS
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden mb-5 bg-slate-800 relative shadow-inner">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10"></div>
+                <img src={welcomeKitImg} alt="Welcome Kit" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-3 left-3 right-3 z-20">
+                   <h3 className="text-xl font-black text-white leading-tight">Welcome Kit</h3>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed flex-1">Premium Pen, Leather Diary, Backpack, Cap & ID Card.</p>
+            </div>
+
+            {/* Reward 2 */}
+            <div className="relative bg-slate-900 rounded-3xl p-5 border border-slate-700/50 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-300 group flex flex-col">
+               <div className="absolute -top-3 -right-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 font-black px-4 py-2 rounded-xl shadow-lg transform rotate-3 scale-110 z-20">
+                51 SHOPS
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden mb-5 bg-slate-800 relative shadow-inner">
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10"></div>
+                <img src={tshirtImg} alt="Official T-Shirt" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                 <div className="absolute bottom-3 left-3 right-3 z-20">
+                   <h3 className="text-xl font-black text-white leading-tight">Official Nexora T-Shirt</h3>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed flex-1">Premium brand apparel for our verified partners.</p>
+            </div>
+
+            {/* Reward 3 */}
+            <div className="relative bg-slate-900 rounded-3xl p-5 border border-slate-700/50 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-300 group flex flex-col">
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 font-black px-4 py-2 rounded-xl shadow-lg transform rotate-3 scale-110 z-20">
+                101 SHOPS
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden mb-5 bg-slate-800 relative shadow-inner">
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10"></div>
+                <img src={tabletImg} alt="Tablet" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-3 left-3 right-3 z-20">
+                   <h3 className="text-xl font-black text-white leading-tight">Tablet Reward</h3>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed flex-1">Enhance your presentations with a brand new tablet.</p>
+            </div>
+
+            {/* Reward 4 */}
+            <div className="relative bg-slate-900 rounded-3xl p-5 border border-slate-700/50 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-300 group flex flex-col lg:col-span-1 md:col-span-2 xl:col-span-1">
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-900 font-black px-4 py-2 rounded-xl shadow-lg transform rotate-3 scale-110 z-20">
+                501 SHOPS
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden mb-5 bg-slate-800 relative shadow-inner">
+                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10"></div>
+                <img src={laptopImg} alt="Branded Laptop" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-3 left-3 right-3 z-20">
+                   <h3 className="text-xl font-black text-white leading-tight">Branded Laptop</h3>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm font-medium leading-relaxed flex-1">Power your business growth with a high-performance laptop.</p>
+            </div>
+
+            {/* Reward 5 */}
+            <div className="bg-slate-900 rounded-3xl p-5 border-2 border-amber-500/30 shadow-[0_0_40px_rgba(245,158,11,0.1)] hover:border-amber-400 hover:shadow-[0_0_50px_rgba(245,158,11,0.25)] transition-all duration-300 group flex flex-col md:col-span-2 lg:col-span-3 xl:col-span-1 relative overflow-hidden">
+               <div className="absolute inset-0 bg-gradient-to-br from-amber-900/20 to-transparent z-0 pointer-events-none"></div>
+              <div className="absolute -top-3 -right-3 bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 font-black px-5 py-2 rounded-xl shadow-[0_5px_15px_rgba(245,158,11,0.4)] transform rotate-3 scale-110 z-20 border border-yellow-200">
+                1001 SHOPS
+              </div>
+              <div className="aspect-square rounded-2xl overflow-hidden mb-5 bg-slate-800 relative shadow-inner z-10 border border-amber-500/20">
+                 <div className="absolute inset-0 bg-gradient-to-t from-amber-900/90 via-slate-900/50 to-transparent z-10"></div>
+                <img src={carImg} alt="Car Reward" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute bottom-4 left-4 right-4 z-20">
+                   <div className="inline-block px-2 py-1 bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[10px] font-bold tracking-widest uppercase rounded mb-2 backdrop-blur-md">Ultimate Reward</div>
+                   <h3 className="text-2xl font-black text-white leading-tight">District Partner & Car</h3>
+                </div>
+              </div>
+              <p className="text-slate-300 text-sm font-medium leading-relaxed flex-1 z-10">Achieve District Business Partner status and ride away in your very own luxury car!</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* Partner Work */}
       <section className="py-24 bg-slate-50 px-4 sm:px-6 lg:px-8 border-y border-slate-100">
         <div className="max-w-[1600px] mx-auto">
@@ -392,13 +507,18 @@ export default function GrowthPartnerPage() {
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <label className="text-sm font-medium text-slate-900">ID / KYC Upload</label>
-                  <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer group">
+                  <label className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer group block">
+                    <input type="file" className="hidden" accept=".jpg,.jpeg,.png,.pdf" onChange={handleFileChange} required />
                     <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
                       <FileCheck className="w-6 h-6" />
                     </div>
-                    <p className="text-sm font-medium text-slate-700">Click to upload Aadhar/PAN</p>
+                    {selectedFile ? (
+                      <p className="text-sm font-medium text-indigo-600">{selectedFile.name}</p>
+                    ) : (
+                      <p className="text-sm font-medium text-slate-700">Click to upload Aadhar/PAN</p>
+                    )}
                     <p className="text-xs text-slate-500 mt-1">Supports JPG, PNG, PDF</p>
-                  </div>
+                  </label>
                 </div>
               </div>
 
