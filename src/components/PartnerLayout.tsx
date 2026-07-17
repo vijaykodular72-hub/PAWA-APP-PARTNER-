@@ -1,11 +1,15 @@
-import { useState } from 'react';
-import { NavLink, Outlet, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Store, Wallet, CreditCard, 
-  Target, GraduationCap, Settings, Menu, Bell, ShieldCheck
+  Target, GraduationCap, Settings, Menu, Bell, ShieldCheck, User, LogOut
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { supabase } from '../lib/supabase';
+import SupportChat from './SupportChat';
+import NotificationCenter from './NotificationCenter';
+import UserProfileMenu from './UserProfileMenu';
 
 const navItems = [
   { name: 'Dashboard', path: '/partner/dashboard', icon: LayoutDashboard },
@@ -18,8 +22,118 @@ const navItems = [
   { name: 'Settings', path: '/partner/settings', icon: Settings },
 ];
 
-export default function PartnerLayout() {
+export default function PartnerLayout({ coords }: { coords: { latitude: number; longitude: number } | null }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+  const [partner, setPartner] = useState<{ name: string; avatar: string | null; loading: boolean }>({
+    name: 'Loading Partner...',
+    avatar: null,
+    loading: true
+  });
+
+  const isSupabaseConfigured = !import.meta.env.VITE_SUPABASE_URL?.includes('placeholder');
+  const isProfileCompletion = location.pathname.includes('complete-profile');
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchProfile() {
+      if (!isSupabaseConfigured) {
+        if (mounted) setPartner(prev => ({ ...prev, loading: false }));
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('partner_profiles')
+          .select('full_name, avatar_url')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (mounted) {
+          setPartner({
+            name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Nexora Partner',
+            avatar: profile?.avatar_url || session.user.user_metadata?.avatar_url || null,
+            loading: false
+          });
+        }
+      } else {
+        if (mounted) {
+          // Force active state for preview instead of "Guest Partner", reading from localStorage
+          setPartner({
+            name: localStorage.getItem('partner_name') || 'Nexora Partner',
+            avatar: localStorage.getItem('partner_avatar') || null,
+            loading: false
+          });
+        }
+      }
+    }
+
+    fetchProfile();
+
+    const handleProfileRefresh = () => {
+      fetchProfile();
+    };
+    window.addEventListener('profileUpdated', handleProfileRefresh);
+    window.addEventListener('profile-updated', handleProfileRefresh);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('partner_profiles')
+          .select('full_name, avatar_url')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (mounted) {
+          setPartner({
+            name: profile?.full_name || session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'Nexora Partner',
+            avatar: profile?.avatar_url || session.user.user_metadata?.avatar_url || null,
+            loading: false
+          });
+        }
+      } else {
+        if (mounted) {
+          setPartner({
+            name: localStorage.getItem('partner_name') || 'Nexora Partner',
+            avatar: localStorage.getItem('partner_avatar') || null,
+            loading: false
+          });
+        }
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      window.removeEventListener('profileUpdated', handleProfileRefresh);
+      window.removeEventListener('profile-updated', handleProfileRefresh);
+    };
+  }, [isSupabaseConfigured]);
+
+  if (isProfileCompletion) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex font-sans">
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
+        <SupportChat />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans">
@@ -82,12 +196,20 @@ export default function PartnerLayout() {
             </p>
           </div>
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-              VK
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold overflow-hidden border border-slate-200 flex-shrink-0 shadow-inner">
+              {partner.loading ? (
+                <div className="w-full h-full bg-slate-100 animate-pulse" />
+              ) : partner.avatar ? (
+                <img src={partner.avatar} alt={partner.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              ) : (
+                <span className="text-sm">{partner.name[0]?.toUpperCase() || 'N'}</span>
+              )}
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-slate-900">Vijay Kumar</p>
-              <p className="text-xs text-slate-500">District Partner</p>
+            <div className="flex-1 min-w-0 ml-3">
+              <p className="text-sm font-bold text-slate-900 truncate">
+                {partner.loading ? 'Nexora Partner' : partner.name}
+              </p>
+              <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">Growth Partner</p>
             </div>
           </div>
         </div>
@@ -106,14 +228,12 @@ export default function PartnerLayout() {
 
           <div className="flex-1 lg:flex-none"></div>
 
-          <div className="flex items-center space-x-4">
-            <button className="p-2 text-slate-400 hover:text-slate-500 hover:bg-slate-100 rounded-full relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
-            </button>
-            <Link to="/growth-partner" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hidden sm:block">
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <Link to="/growth-partner" className="text-xs font-bold text-indigo-600 hover:text-indigo-700 hidden md:block uppercase tracking-wider">
               View Public Page
             </Link>
+            <NotificationCenter />
+            <UserProfileMenu />
           </div>
         </header>
 
@@ -121,6 +241,7 @@ export default function PartnerLayout() {
         <main className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
+        <SupportChat />
       </div>
     </div>
   );

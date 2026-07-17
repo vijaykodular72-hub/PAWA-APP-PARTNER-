@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { 
   ArrowRight, 
@@ -19,10 +20,15 @@ import {
   ShieldCheck,
   LayoutDashboard,
   Rocket,
-  LucideIcon
+  LucideIcon,
+  User as UserIcon,
+  ChevronRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
+import UserProfileMenu from '../components/UserProfileMenu';
+import NotificationCenter from '../components/NotificationCenter';
 import welcomeKitImg from '../assets/images/welcome_kit_reward_1783078021840.jpg';
 import tshirtImg from '../assets/images/tshirt_reward_1783078036289.jpg';
 import tabletImg from '../assets/images/tablet_reward_1783078050167.jpg';
@@ -30,11 +36,61 @@ import laptopImg from '../assets/images/laptop_reward_1783078062332.jpg';
 import carImg from '../assets/images/car_reward_1783078073354.jpg';
 
 export default function GrowthPartnerPage() {
+  const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+
+  useEffect(() => {
+    // We can still listen for auth changes to update the hero button
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoadingAuth(false);
+    });
+
+    // Initial check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoadingAuth(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFileError(null);
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      
+      // Validation
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+
+      if (!allowedTypes.includes(file.type)) {
+        setFileError('Invalid file format. Please upload PDF, JPEG, or PNG.');
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        return;
+      }
+
+      if (file.size > maxSize) {
+        setFileError('File size exceeds 5MB limit. Please upload a smaller file.');
+        setSelectedFile(null);
+        setPreviewUrl(null);
+        return;
+      }
+
+      setSelectedFile(file);
+      
+      // Create preview for images
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+      } else {
+        setPreviewUrl(null);
+      }
     }
   };
 
@@ -50,16 +106,9 @@ export default function GrowthPartnerPage() {
             <span className="text-xl font-bold tracking-tight text-slate-900">Nexora</span>
             <span className="text-xl font-light text-slate-400 hidden sm:inline">Partner</span>
           </div>
-          <div className="flex items-center space-x-4">
-            <Link to="/partner/dashboard" className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-              Login
-            </Link>
-            <Link 
-              to="/partner/dashboard" 
-              className="px-5 py-2 bg-slate-900 text-white text-sm font-medium rounded-full hover:bg-slate-800 transition-all shadow-sm hover:shadow"
-            >
-              Join Program
-            </Link>
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <NotificationCenter />
+            <UserProfileMenu />
           </div>
         </div>
       </nav>
@@ -90,13 +139,15 @@ export default function GrowthPartnerPage() {
             Leverage your beauty industry network. Onboard salons, activate their business, and build long-term wealth with Nexora.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Link
-              to="/partner/dashboard"
-              className="w-full sm:w-auto px-8 py-4 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center group"
-            >
-              Apply as Growth Partner
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            {!loadingAuth && (
+              <Link
+                to="/partner/dashboard"
+                className="w-full sm:w-auto px-8 py-4 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center group"
+              >
+                {user ? 'Go to Dashboard' : 'Login to Dashboard'}
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            )}
             <a
               href="https://wa.me/yourwhatsappnumber" 
               target="_blank"
@@ -149,8 +200,8 @@ export default function GrowthPartnerPage() {
             {/* Desktop connecting line */}
             <div className="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-slate-100 via-indigo-100 to-slate-100" />
             
-            <StepCard number="1" title="Apply Online" desc="Fill out the basic application form." icon={FileCheck} />
-            <StepCard number="2" title="Verification" desc="Mobile, email and KYC document check." icon={ShieldCheck} />
+            <StepCard number="1" title="Login" desc="Login using your Nexora credentials." icon={FileCheck} />
+            <StepCard number="2" title="Verification" desc="Complete your profile and KYC." icon={ShieldCheck} />
             <StepCard number="3" title="Training" desc="Complete our short certification module." icon={BookOpen} />
             <StepCard number="4" title="Start Earning" desc="Dashboard activated. Begin onboarding." icon={Rocket} />
           </div>
@@ -440,102 +491,6 @@ export default function GrowthPartnerPage() {
         </div>
       </section>
 
-      {/* Apply Form */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Apply Now</h2>
-            <p className="mt-4 text-lg text-slate-500">Join the Nexora Growth Partner Program.</p>
-          </div>
-          
-          <div className="bg-white rounded-[2.5rem] p-8 lg:p-12 border border-slate-200 shadow-2xl shadow-slate-200/40">
-            <form className="space-y-6" onSubmit={(e) => {
-              e.preventDefault();
-              alert("Application submitted successfully. Nexora team will verify your profile and activate your Growth Partner dashboard after approval.");
-            }}>
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-900">Full Name</label>
-                  <input required type="text" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="Enter your full name" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-900">Email Address</label>
-                  <input required type="email" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="Enter your email" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-900">Mobile Number</label>
-                  <input required type="tel" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="10-digit mobile number" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-900">WhatsApp Number</label>
-                  <input required type="tel" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="WhatsApp number" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-900">State</label>
-                  <input required type="text" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="E.g., Maharashtra" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-900">District</label>
-                  <input required type="text" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="E.g., Pune" />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-900">City</label>
-                  <input required type="text" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="E.g., Baner" />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-900">Current Work Type</label>
-                  <select required className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-700">
-                    <option value="">Select work type</option>
-                    <option value="beauty_sales">Beauty Product Sales</option>
-                    <option value="distributor">Distributor / Agency</option>
-                    <option value="consultant">Beauty Consultant</option>
-                    <option value="other">Other Field Sales</option>
-                  </select>
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-900">Beauty Industry Experience</label>
-                  <select required className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all text-slate-700">
-                    <option value="">Select experience</option>
-                    <option value="0-2">0 - 2 Years</option>
-                    <option value="3-5">3 - 5 Years</option>
-                    <option value="5+">5+ Years</option>
-                  </select>
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-900">Number of Salons in Network</label>
-                  <input required type="number" className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="E.g., 50" />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <label className="text-sm font-medium text-slate-900">ID / KYC Upload</label>
-                  <label className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer group block">
-                    <input type="file" className="hidden" accept=".jpg,.jpeg,.png,.pdf" onChange={handleFileChange} required />
-                    <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                      <FileCheck className="w-6 h-6" />
-                    </div>
-                    {selectedFile ? (
-                      <p className="text-sm font-medium text-indigo-600">{selectedFile.name}</p>
-                    ) : (
-                      <p className="text-sm font-medium text-slate-700">Click to upload Aadhar/PAN</p>
-                    )}
-                    <p className="text-xs text-slate-500 mt-1">Supports JPG, PNG, PDF</p>
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3 pt-6">
-                <input required type="checkbox" className="mt-1 w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  I agree to the Growth Partner terms and conditions. I understand this is a performance-based partnership and not a salaried employment.
-                </p>
-              </div>
-
-              <button type="submit" className="w-full py-4 bg-slate-900 text-white rounded-xl font-medium text-lg hover:bg-slate-800 transition-all shadow-lg hover:-translate-y-0.5">
-                Submit Application
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

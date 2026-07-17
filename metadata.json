@@ -1,6 +1,6 @@
 {
   "name": "Nexora Growth Partner",
   "description": "District Business Partner Program and Dashboard for Nexora SalonOS.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
