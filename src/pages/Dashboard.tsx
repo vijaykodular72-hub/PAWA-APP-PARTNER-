@@ -19,6 +19,7 @@ import InfoTooltip from '../components/Tooltip';
 import BoardShopModal from '../components/BoardShopModal';
 import PartnerOnboardingChecklist from '../components/PartnerOnboardingChecklist';
 import OnboardingHeatmap from '../components/OnboardingHeatmap';
+import KPISummary from '../components/KPISummary';
 
 const chartData = [
   { name: 'Mon', revenue: 4000 },
@@ -46,14 +47,39 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
     lifetimeEarnings: '₹0',
     milestoneCount: 0,
     monthlyShops: 0,
-    partnerName: 'Partner'
+    partnerName: 'Partner',
+    activeLeadsCount: 0,
+    currentMonthCommissions: '₹0'
   });
 
   useEffect(() => {
     async function fetchStats() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+          // Set simulated fallback data for local preview / guest users
+          setStats({
+            availableBalance: '₹18,500',
+            pendingBalance: '₹4,500',
+            todayCommission: '₹1,200',
+            totalShops: 28,
+            activeShops: 25,
+            verifiedShops: 22,
+            pendingShops: 6,
+            lifetimeEarnings: '₹48,000',
+            milestoneCount: 25,
+            monthlyShops: 6,
+            partnerName: localStorage.getItem('partner_name') || 'Vijay Kumar',
+            activeLeadsCount: 12,
+            currentMonthCommissions: '₹14,500'
+          });
+          setNearbyShops([
+            { id: 'sim-1', name: 'Nexora Elite Salon', area: 'Baner', district: 'Pune' },
+            { id: 'sim-2', name: 'Mirror Mirror Unisex Salon', area: 'Kothrud', district: 'Pune' },
+            { id: 'sim-3', name: 'The Grooming Lounge', area: 'Viman Nagar', district: 'Pune' }
+          ]);
+          return;
+        }
 
         // Fetch partner profile
         const { data: profile } = await supabase
@@ -114,7 +140,9 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
             milestoneCount: totalShops || 0,
             // For now, these remain static or fetched if tables exist
             availableBalance: `₹${(profile.balance || 0).toLocaleString()}`,
-            lifetimeEarnings: `₹${(profile.total_earned || 0).toLocaleString()}`
+            lifetimeEarnings: `₹${(profile.total_earned || 0).toLocaleString()}`,
+            activeLeadsCount: activeLeads || 0,
+            currentMonthCommissions: '₹14,500'
           }));
 
           // Fetch top 3 shops for distance check
@@ -246,6 +274,13 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
           </button>
         </div>
       </div>
+
+      {/* KPI Summary Component */}
+      <KPISummary 
+        activeLeadsCount={stats.activeLeadsCount} 
+        currentMonthCommissions={stats.currentMonthCommissions} 
+        activeShopsCount={stats.activeShops} 
+      />
 
       {/* Partner Onboarding Checklist */}
       <PartnerOnboardingChecklist />
@@ -525,7 +560,7 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
                   : 'Congratulations! You have unlocked your first reward.'}
               </p>
               
-              <Link to="/partner/growth" className="w-full mt-6 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-medium hover:bg-indigo-100 transition-colors inline-block text-center">
+              <Link to="/partner/milestones" className="w-full mt-6 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-medium hover:bg-indigo-100 transition-colors inline-block text-center">
                 View All Milestones
               </Link>
             </div>

@@ -70,7 +70,63 @@ export default function Shops({ coords }: { coords: { latitude: number; longitud
   const fetchShops = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        // Set simulated fallback shops for preview / guest users
+        setShopsList([
+          {
+            id: 'sim-1',
+            name: 'Nexora Elite Salon',
+            owner: 'Amit Sharma',
+            mobile: '+91 9876543210',
+            area: 'Baner',
+            district: 'Pune',
+            onboardingDate: '2026-07-10',
+            websiteStatus: 'Published',
+            verificationStatus: 'Verified',
+            qrStatus: 'Generated',
+            activeStatus: 'Active',
+            todayCollection: '₹12,450',
+            totalRevenue: '₹2,34,500',
+            partnerCommission: '₹23,450',
+            activationProgress: 100
+          },
+          {
+            id: 'sim-2',
+            name: 'Mirror Mirror Unisex Salon',
+            owner: 'Sanjay Gupta',
+            mobile: '+91 8765432109',
+            area: 'Kothrud',
+            district: 'Pune',
+            onboardingDate: '2026-07-12',
+            websiteStatus: 'Pending',
+            verificationStatus: 'Verified',
+            qrStatus: 'Generated',
+            activeStatus: 'Active',
+            todayCollection: '₹4,500',
+            totalRevenue: '₹95,000',
+            partnerCommission: '₹9,500',
+            activationProgress: 75
+          },
+          {
+            id: 'sim-3',
+            name: 'The Grooming Lounge',
+            owner: 'Rajesh Patil',
+            mobile: '+91 7654321098',
+            area: 'Viman Nagar',
+            district: 'Pune',
+            onboardingDate: '2026-07-14',
+            websiteStatus: 'Published',
+            verificationStatus: 'Pending',
+            qrStatus: 'Pending',
+            activeStatus: 'Inactive',
+            todayCollection: '₹0',
+            totalRevenue: '₹0',
+            partnerCommission: '₹0',
+            activationProgress: 30
+          }
+        ]);
+        return;
+      }
 
       const { data: profile } = await supabase
         .from('partner_profiles')

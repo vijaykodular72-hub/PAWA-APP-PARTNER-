@@ -10,7 +10,7 @@ interface UserProfileMenuProps {
 }
 
 export default function UserProfileMenu({ variant = 'light' }: UserProfileMenuProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
