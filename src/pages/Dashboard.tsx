@@ -21,6 +21,7 @@ import PartnerOnboardingChecklist from '../components/PartnerOnboardingChecklist
 import OnboardingHeatmap from '../components/OnboardingHeatmap';
 import KPISummary from '../components/KPISummary';
 import { exportDashboardToPDF } from '../utils/pdfExport';
+import TargetOpportunitiesMap from '../components/TargetOpportunitiesMap';
 
 const chartData = [
   { name: 'Mon', revenue: 4000 },
@@ -377,6 +378,17 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
               </ResponsiveContainer>
             </div>
           </div>
+
+          {/* Geographical Target Salon Opportunities Map */}
+          <TargetOpportunitiesMap 
+            coords={coords} 
+            onAddAsLead={(salon) => {
+              setStats(prev => ({
+                ...prev,
+                activeLeadsCount: prev.activeLeadsCount + 1
+              }));
+            }} 
+          />
 
           {/* District Partner Leaderboard */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
