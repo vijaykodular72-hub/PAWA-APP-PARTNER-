@@ -18,6 +18,7 @@ import carImg from '../assets/images/car_reward_1783078073354.jpg';
 import InfoTooltip from '../components/Tooltip';
 import BoardShopModal from '../components/BoardShopModal';
 import PartnerOnboardingChecklist from '../components/PartnerOnboardingChecklist';
+import OnboardingHeatmap from '../components/OnboardingHeatmap';
 
 const chartData = [
   { name: 'Mon', revenue: 4000 },
@@ -282,6 +283,9 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-2 space-y-6">
+          {/* Onboarding Heatmap */}
+          <OnboardingHeatmap />
+
           {/* Earnings Chart */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
