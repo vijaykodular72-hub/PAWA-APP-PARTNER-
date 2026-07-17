@@ -207,11 +207,15 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
   }
 
   // Dynamic Leaderboard Calculation
+  const [leaderboardTab, setLeaderboardTab] = useState<'district' | 'national'>('district');
   const [leaderboardData, setLeaderboardData] = useState([
-    { id: 1, name: "Rajesh Sharma", district: "Mumbai City, MH", activeShops: 245, growth: "+18%", tier: "Elite", isCurrentUser: false, cheers: 12 },
-    { id: 2, name: "Amit Patel", district: "Pune Central, MH", activeShops: 182, growth: "+14%", tier: "Gold", isCurrentUser: false, cheers: 8 },
-    { id: 3, name: "Priya Nair", district: "Thane West, MH", activeShops: 120, growth: "+11%", tier: "Gold", isCurrentUser: false, cheers: 5 },
-    { id: 4, name: "Ananya Gupta", district: "Nashik Metro, MH", activeShops: 85, growth: "+8%", tier: "Silver", isCurrentUser: false, cheers: 2 },
+    { id: 1, name: "Rajesh Sharma", district: "Mumbai City, MH", activeShops: 245, growth: "+18%", tier: "Elite", isCurrentUser: false, cheers: 12, scope: "national" },
+    { id: 2, name: "Amit Patel", district: "Pune Central, MH", activeShops: 182, growth: "+14%", tier: "Gold", isCurrentUser: false, cheers: 8, scope: "both" }, // is in Pune
+    { id: 3, name: "Priya Nair", district: "Thane West, MH", activeShops: 120, growth: "+11%", tier: "Gold", isCurrentUser: false, cheers: 5, scope: "national" },
+    { id: 4, name: "Ananya Gupta", district: "Nashik Metro, MH", activeShops: 85, growth: "+8%", tier: "Silver", isCurrentUser: false, cheers: 2, scope: "national" },
+    { id: 6, name: "Rohan Deshmukh", district: "Kothrud, Pune, MH", activeShops: 42, growth: "+19%", tier: "Silver", isCurrentUser: false, cheers: 14, scope: "district" },
+    { id: 7, name: "Sneha Kulkarni", district: "Viman Nagar, Pune, MH", activeShops: 31, growth: "+15%", tier: "Bronze", isCurrentUser: false, cheers: 9, scope: "district" },
+    { id: 8, name: "Nikhil Shinde", district: "Wakad, Pune, MH", activeShops: 18, growth: "+10%", tier: "Bronze", isCurrentUser: false, cheers: 3, scope: "district" },
   ]);
 
   const currentUserActiveShops = stats.activeShops || 25; // fallback to 25 to match Milestones simulation
@@ -223,10 +227,23 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
     growth: "+12%",
     tier: currentUserActiveShops >= 100 ? "Gold" : currentUserActiveShops >= 50 ? "Silver" : "Bronze",
     isCurrentUser: true,
-    cheers: 0
+    cheers: 0,
+    scope: "both"
   };
 
-  const combinedLeaderboard = [...leaderboardData, partnerData]
+  const fullLeaderboard = [...leaderboardData, partnerData];
+
+  // Filter leaderboard based on active tab
+  const filteredLeaderboard = fullLeaderboard.filter(partner => {
+    if (leaderboardTab === 'district') {
+      // Show partners in Pune region (scope is "district" or "both")
+      return partner.scope === 'district' || partner.scope === 'both' || partner.district.includes('Pune');
+    }
+    // Show national partners (scope is "national" or "both")
+    return partner.scope === 'national' || partner.scope === 'both';
+  });
+
+  const sortedLeaderboard = [...filteredLeaderboard]
     .sort((a, b) => b.activeShops - a.activeShops)
     .map((partner, index) => ({
       ...partner,
@@ -363,22 +380,85 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
 
           {/* District Partner Leaderboard */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-500 animate-pulse" />
-                  Top District Partners Leaderboard
-                  <InfoTooltip content="Ranks are based on active revenue-generating shops. Quality > Quantity." position="right" />
+                  Nexora Partner Arena
+                  <InfoTooltip content="Ranks are based on active revenue-generating shops in each region. Quality > Quantity." position="right" />
                 </h2>
                 <p className="text-sm text-slate-500">
-                  Healthy competition among Nexora's top growth partners. Ranks are updated based on active referred shops.
+                  Track your growth rankings regionally and nationally to foster high performance.
                 </p>
               </div>
-              <div className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>All India Rankings</span>
+              
+              {/* Leaderboard Segmented Tabs */}
+              <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/60 self-start md:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setLeaderboardTab('district')}
+                  className={cn(
+                    "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer",
+                    leaderboardTab === 'district'
+                      ? "bg-white text-indigo-950 shadow-sm font-black"
+                      : "text-slate-500 hover:text-slate-850"
+                  )}
+                >
+                  <MapPin className="w-3.5 h-3.5 text-indigo-500" />
+                  Pune District
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLeaderboardTab('national')}
+                  className={cn(
+                    "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer",
+                    leaderboardTab === 'national'
+                      ? "bg-white text-indigo-950 shadow-sm font-black"
+                      : "text-slate-500 hover:text-slate-850"
+                  )}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  National Track
+                </button>
               </div>
             </div>
+
+            {/* Dynamic Motivation / Rank Banner */}
+            {(() => {
+              const myRank = sortedLeaderboard.find(p => p.isCurrentUser)?.rank || 1;
+              const myIndex = sortedLeaderboard.findIndex(p => p.isCurrentUser);
+              const partnerAhead = myIndex > 0 ? sortedLeaderboard[myIndex - 1] : null;
+              const shopsDiff = partnerAhead ? partnerAhead.activeShops - currentUserActiveShops : 0;
+
+              return (
+                <div className="bg-gradient-to-r from-indigo-50/70 to-purple-50/70 border border-indigo-100/80 rounded-xl p-4 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-md shadow-indigo-100 ring-2 ring-indigo-50">
+                      #{myRank}
+                    </div>
+                    <div>
+                      <p className="font-bold text-indigo-950">
+                        You are ranked #{myRank} of {sortedLeaderboard.length} active partners in {leaderboardTab === 'district' ? 'Pune District' : 'National Track'}
+                      </p>
+                      <p className="text-slate-500 font-semibold mt-0.5">
+                        {partnerAhead ? (
+                          <span>Onboard {shopsDiff + 1} more active salons to overtake {partnerAhead.name} (#{partnerAhead.rank})!</span>
+                        ) : (
+                          <span>Outstanding work! You are currently leading this leaderboard. Keep up the stellar momentum!</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <Link 
+                    to="/partner/shops" 
+                    className="text-indigo-600 hover:text-indigo-750 font-bold flex items-center gap-1 bg-white border border-indigo-100 rounded-lg px-3 py-1.5 shadow-sm self-start sm:self-auto hover:shadow transition-all"
+                  >
+                    <span>Board More Salons</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                  </Link>
+                </div>
+              );
+            })()}
 
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -393,7 +473,7 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {combinedLeaderboard.map((partner) => {
+                  {sortedLeaderboard.map((partner) => {
                     const isMe = partner.isCurrentUser;
                     const getRankBadge = (rank: number) => {
                       if (rank === 1) {
