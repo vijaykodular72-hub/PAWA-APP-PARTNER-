@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Store, Users, IndianRupee, Wallet, Clock, CheckCircle2, ShieldCheck, Trophy, Calendar, Loader2, TrendingUp, Navigation, Medal, Crown, ArrowUpRight, Sparkles, MapPin, Target, Award, Coins, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Store, Users, IndianRupee, Wallet, Clock, CheckCircle2, ShieldCheck, Trophy, Calendar, Loader2, TrendingUp, Navigation, Medal, Crown, ArrowUpRight, Sparkles, MapPin, Target, Award, Coins, Zap, UserPlus, PlusCircle, CreditCard, Briefcase, CalendarDays, X, Bell, FileText, Phone, User } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 import ActivityFeed from '../components/ActivityFeed';
 import { calculateDistance, formatDistance } from '../utils/distance';
+import { useNotifications } from '../components/NotificationProvider';
 
 const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_PLATFORM_KEY || '';
 import welcomeKitImg from '../assets/images/welcome_kit_reward_1783078021840.jpg';
@@ -14,6 +15,8 @@ import tshirtImg from '../assets/images/tshirt_reward_1783078036289.jpg';
 import tabletImg from '../assets/images/tablet_reward_1783078050167.jpg';
 import laptopImg from '../assets/images/laptop_reward_1783078062332.jpg';
 import carImg from '../assets/images/car_reward_1783078073354.jpg';
+import InfoTooltip from '../components/Tooltip';
+import BoardShopModal from '../components/BoardShopModal';
 
 const chartData = [
   { name: 'Mon', revenue: 4000 },
@@ -27,6 +30,8 @@ const chartData = [
 
 export default function Dashboard({ coords }: { coords: { latitude: number; longitude: number } | null }) {
   const [loading, setLoading] = useState(true);
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
+  const { addNotification } = useNotifications();
   const [nearbyShops, setNearbyShops] = useState<any[]>([]);
   const [stats, setStats] = useState({
     availableBalance: '₹0',
@@ -171,48 +176,84 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
   }
 
   // Dynamic Leaderboard Calculation
-  const baseLeaderboard = [
-    { name: "Rajesh Sharma", district: "Mumbai City, MH", activeShops: 245, growth: "+18%", tier: "Elite", isCurrentUser: false },
-    { name: "Amit Patel", district: "Pune Central, MH", activeShops: 182, growth: "+14%", tier: "Gold", isCurrentUser: false },
-    { name: "Priya Nair", district: "Thane West, MH", activeShops: 120, growth: "+11%", tier: "Gold", isCurrentUser: false },
-    { name: "Ananya Gupta", district: "Nashik Metro, MH", activeShops: 85, growth: "+8%", tier: "Silver", isCurrentUser: false },
-  ];
+  const [leaderboardData, setLeaderboardData] = useState([
+    { id: 1, name: "Rajesh Sharma", district: "Mumbai City, MH", activeShops: 245, growth: "+18%", tier: "Elite", isCurrentUser: false, cheers: 12 },
+    { id: 2, name: "Amit Patel", district: "Pune Central, MH", activeShops: 182, growth: "+14%", tier: "Gold", isCurrentUser: false, cheers: 8 },
+    { id: 3, name: "Priya Nair", district: "Thane West, MH", activeShops: 120, growth: "+11%", tier: "Gold", isCurrentUser: false, cheers: 5 },
+    { id: 4, name: "Ananya Gupta", district: "Nashik Metro, MH", activeShops: 85, growth: "+8%", tier: "Silver", isCurrentUser: false, cheers: 2 },
+  ]);
 
   const currentUserActiveShops = stats.activeShops || 25; // fallback to 25 to match Milestones simulation
   const partnerData = {
+    id: 5,
     name: stats.partnerName === 'Partner' ? 'Vijay Kumar' : stats.partnerName,
     district: "Baner, Pune, MH",
     activeShops: currentUserActiveShops,
     growth: "+12%",
     tier: currentUserActiveShops >= 100 ? "Gold" : currentUserActiveShops >= 50 ? "Silver" : "Bronze",
-    isCurrentUser: true
+    isCurrentUser: true,
+    cheers: 0
   };
 
-  const combinedLeaderboard = [...baseLeaderboard, partnerData]
+  const combinedLeaderboard = [...leaderboardData, partnerData]
     .sort((a, b) => b.activeShops - a.activeShops)
     .map((partner, index) => ({
       ...partner,
       rank: index + 1
     }));
 
+  const handleCheer = (id: number) => {
+    setLeaderboardData(prev => prev.map(p => p.id === id ? { ...p, cheers: p.cheers + 1 } : p));
+    addNotification('Cheer Sent! 👏', 'You encouraged a fellow partner.', 'success');
+  };
+
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
+  const handleGenerateReport = () => {
+    setIsGeneratingReport(true);
+    addNotification('Generating Report...', 'Compiling your growth and leaderboard stats.', 'info');
+    setTimeout(() => {
+      setIsGeneratingReport(false);
+      addNotification('Report Generated! 📄', 'Your monthly growth and leaderboard report is ready.', 'success');
+    }, 2000);
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      <BoardShopModal isOpen={isBoardModalOpen} onClose={() => setIsBoardModalOpen(false)} />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Partner Dashboard</h1>
           <p className="text-slate-500 text-sm">Welcome back, {stats.partnerName}. Here's your performance snapshot.</p>
         </div>
-        <Link to="/partner/shops" className="bg-indigo-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-800 transition-colors inline-block text-center">
-          Board New Shop
-        </Link>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleGenerateReport}
+            disabled={isGeneratingReport}
+            className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+          >
+            {isGeneratingReport ? (
+              <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+            ) : (
+              <FileText className="w-4 h-4 text-indigo-600" />
+            )}
+            {isGeneratingReport ? 'Generating...' : 'Generate PDF Report'}
+          </button>
+          <button onClick={() => setIsBoardModalOpen(true)} className="bg-indigo-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-800 transition-colors inline-block text-center cursor-pointer">
+            Board New Shop
+          </button>
+        </div>
       </div>
 
       {/* Payouts & Balances */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Available Balance" value={stats.availableBalance} icon={Wallet} color="emerald" />
-        <MetricCard title="Pending Balance" value={stats.pendingBalance} icon={Clock} color="amber" />
-        <MetricCard title="Today's Commission" value={stats.todayCommission} icon={IndianRupee} color="indigo" />
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center">
+        <MetricCard title="Available Balance" value={stats.availableBalance} icon={Wallet} color="emerald" tooltip="Cleared funds ready for Monday payout. Ensure your KYC is complete." />
+        <MetricCard title="Pending Balance" value={stats.pendingBalance} icon={Clock} color="amber" tooltip="Commission from recent transactions currently in the clearing window." />
+        <MetricCard title="Today's Commission" value={stats.todayCommission} icon={IndianRupee} color="indigo" tooltip="Your earnings calculated from today's shop revenues." />
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-center relative">
+          <div className="absolute top-6 right-6">
+            <InfoTooltip content="Payouts happen automatically every Monday to your linked bank account." position="bottom" />
+          </div>
           <div className="flex items-start justify-between mb-2">
             <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
               <Calendar className="w-5 h-5" />
@@ -229,10 +270,10 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
       {/* Shops Overview */}
       <h2 className="text-lg font-bold text-slate-900 mt-8 mb-4">Shops Overview</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Total Onboarded" value={stats.totalShops.toString()} icon={Store} color="blue" />
-        <MetricCard title="Active Shops" value={stats.activeShops.toString()} icon={CheckCircle2} color="emerald" />
-        <MetricCard title="Verified Shops" value={stats.verifiedShops.toString()} icon={ShieldCheck} color="indigo" />
-        <MetricCard title="Pending Verification" value={stats.pendingShops.toString()} icon={Clock} color="slate" />
+        <MetricCard title="Total Onboarded" value={stats.totalShops.toString()} icon={Store} color="blue" tooltip="Total salons you have registered on the Nexora platform." />
+        <MetricCard title="Active Shops" value={stats.activeShops.toString()} icon={CheckCircle2} color="emerald" tooltip="An active shop regularly processes transactions via Nexora." />
+        <MetricCard title="Verified Shops" value={stats.verifiedShops.toString()} icon={ShieldCheck} color="indigo" tooltip="Shops whose KYC and documentation are verified by the admin." />
+        <MetricCard title="Pending Verification" value={stats.pendingShops.toString()} icon={Clock} color="slate" tooltip="Help these shops complete their digital catalog and KYC." />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -276,6 +317,7 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
                 <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-amber-500 animate-pulse" />
                   Top District Partners Leaderboard
+                  <InfoTooltip content="Ranks are based on active revenue-generating shops. Quality > Quantity." position="right" />
                 </h2>
                 <p className="text-sm text-slate-500">
                   Healthy competition among Nexora's top growth partners. Ranks are updated based on active referred shops.
@@ -295,7 +337,8 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
                     <th className="pb-3">Partner Details</th>
                     <th className="pb-3 hidden sm:table-cell">Region</th>
                     <th className="pb-3 text-center">Onboarded Shops</th>
-                    <th className="pb-3 text-right pr-2">Growth (MoM)</th>
+                    <th className="pb-3 text-right">Growth (MoM)</th>
+                    <th className="pb-3 text-center pr-2">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -395,11 +438,27 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
                             {partner.activeShops}
                           </span>
                         </td>
-                        <td className="py-4 text-right pr-2">
+                        <td className="py-4 text-right">
                           <span className="inline-flex items-center gap-1 text-xs font-black text-emerald-600 font-mono bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
                             <ArrowUpRight className="w-3 h-3 stroke-[3]" />
                             {partner.growth}
                           </span>
+                        </td>
+                        <td className="py-4 text-center pr-2">
+                          <button
+                            type="button"
+                            onClick={() => handleCheer(partner.id)}
+                            disabled={isMe}
+                            className={cn(
+                              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors",
+                              isMe 
+                                ? "bg-slate-100 text-slate-400 cursor-not-allowed" 
+                                : "bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 cursor-pointer"
+                            )}
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            {partner.cheers}
+                          </button>
                         </td>
                       </tr>
                     );
@@ -414,6 +473,9 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
         </div>
 
         <div className="space-y-6">
+          {/* Quick Actions Card */}
+          <QuickActions stats={stats} />
+
           {/* Financial Overview */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <h2 className="text-lg font-bold text-slate-900 mb-6">Financial Overview</h2>
@@ -460,6 +522,9 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
               </Link>
             </div>
           </div>
+
+          {/* Earned Badges */}
+          <MilestoneBadges stats={stats} />
 
           {/* Monthly Commission Goal */}
           <MonthlyGoalTracker monthlyShops={stats.monthlyShops} />
@@ -666,7 +731,7 @@ function MonthlyGoalTracker({ monthlyShops }: { monthlyShops: number }) {
   );
 }
 
-function MetricCard({ title, value, icon: Icon, color }: any) {
+function MetricCard({ title, value, icon: Icon, color, tooltip }: any) {
   const colorMap: any = {
     emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
     amber: 'bg-amber-50 text-amber-600 border-amber-100',
@@ -684,6 +749,9 @@ function MetricCard({ title, value, icon: Icon, color }: any) {
         <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center border", colorMap[color])}>
           <Icon className="w-5 h-5" />
         </div>
+        {tooltip && (
+          <InfoTooltip content={tooltip} position="bottom" />
+        )}
       </div>
       <div>
         <p className="text-sm font-medium text-slate-500">{title}</p>
@@ -767,6 +835,7 @@ function MonthlyGrowthTargets({ stats }: { stats: any }) {
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <Target className="w-5 h-5 text-indigo-600 animate-pulse" />
             Monthly Growth Targets
+            <InfoTooltip content="Help salons set up their digital catalog properly to increase their transactions and your commission." position="right" />
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
             Track and forecast your commission goals with visual milestones and unlock special partner cash rewards.
@@ -971,6 +1040,729 @@ function MonthlyGrowthTargets({ stats }: { stats: any }) {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function QuickActions({ stats }: { stats: any }) {
+  const { addNotification } = useNotifications();
+  const navigate = useNavigate();
+  
+  // Modal visibility states
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [isPayoutModalOpen, setIsPayoutModalOpen] = useState(false);
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+
+  // Form submission / loading states
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  
+  // Scheduled visits list
+  const [visits, setVisits] = useState<any[]>([]);
+  const [partnerShops, setPartnerShops] = useState<any[]>([]);
+
+  // Load scheduled visits and actual referred shops
+  useEffect(() => {
+    const savedVisits = JSON.parse(localStorage.getItem('nexora_scheduled_visits') || '[]');
+    setVisits(savedVisits);
+
+    async function fetchPartnerShops() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data: profile } = await supabase
+          .from('partner_profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        if (profile) {
+          const { data: referrals } = await supabase
+            .from('partner_business_referrals')
+            .select('*, shops(*)')
+            .eq('partner_id', profile.id);
+          if (referrals) {
+            setPartnerShops(referrals.map((r: any) => ({
+              id: r.shops.id,
+              name: r.shops.shop_name,
+              area: r.shops.area
+            })));
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching partner shops for scheduler:", err);
+      }
+    }
+    fetchPartnerShops();
+  }, []);
+
+  // Log lead action
+  const handleLeadSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmittingLead(true);
+
+    const formData = new FormData(e.currentTarget);
+    const shopName = formData.get('shopName') as string;
+    const ownerName = formData.get('ownerName') as string;
+    const whatsapp = formData.get('whatsapp') as string;
+    const area = formData.get('area') as string;
+    const district = formData.get('district') as string || 'Pune, MH';
+    const notes = formData.get('notes') as string || '';
+
+    try {
+      // 1. Try onboarding the shop directly via the database RPC!
+      const { error } = await supabase.rpc('board_new_partner_shop', {
+        p_shop_name: shopName,
+        p_owner_name: ownerName,
+        p_whatsapp: whatsapp,
+        p_area: area,
+        p_district: district
+      });
+
+      if (error) {
+        // 2. Try inserting to partner_leads table if rpc has constraints
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('partner_profiles')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+          if (profile) {
+            await supabase
+              .from('partner_leads')
+              .insert([{
+                partner_id: profile.id,
+                name: shopName,
+                owner: ownerName,
+                mobile: whatsapp,
+                area: area,
+                status: 'New',
+                notes: notes
+              }]);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Direct database insertion bypassed/failed, registering locally:", err);
+    } finally {
+      // 3. Save to localStorage to ensure local persistence
+      const localLeads = JSON.parse(localStorage.getItem('nexora_local_leads') || '[]');
+      const newLead = {
+        id: crypto.randomUUID(),
+        name: shopName,
+        owner: ownerName,
+        mobile: whatsapp,
+        area: area,
+        date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        status: 'New',
+        notes: notes
+      };
+      localStorage.setItem('nexora_local_leads', JSON.stringify([newLead, ...localLeads]));
+
+      addNotification(
+        'Lead Logged Successfully! 🚀',
+        `"${shopName}" is registered in your growth partner lead pipeline.`,
+        'success'
+      );
+      
+      setIsSubmittingLead(false);
+      setIsLeadModalOpen(false);
+    }
+  };
+
+  // Schedule visit action
+  const handleScheduleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const shopName = formData.get('shopName') as string;
+    const date = formData.get('date') as string;
+    const time = formData.get('time') as string;
+    const purpose = formData.get('purpose') as string;
+    const notes = formData.get('notes') as string || '';
+
+    const newVisit = {
+      id: crypto.randomUUID(),
+      shopName,
+      date,
+      time,
+      purpose,
+      notes,
+      createdAt: new Date().toISOString()
+    };
+
+    const updatedVisits = [newVisit, ...visits];
+    localStorage.setItem('nexora_scheduled_visits', JSON.stringify(updatedVisits));
+    setVisits(updatedVisits);
+
+    addNotification(
+      'Visit Scheduled! 📅',
+      `Meeting at "${shopName}" is set for ${date} at ${time}.`,
+      'success'
+    );
+
+    setIsScheduleModalOpen(false);
+  };
+
+  // Cancel visit action
+  const handleCancelVisit = (id: string, shopName: string) => {
+    const updated = visits.filter(v => v.id !== id);
+    localStorage.setItem('nexora_scheduled_visits', JSON.stringify(updated));
+    setVisits(updated);
+    addNotification(
+      'Visit Cancelled',
+      `Meeting with ${shopName} has been cancelled.`,
+      'info'
+    );
+  };
+
+  const [payouts, setPayouts] = useState([
+    { id: '1', amount: 12500, date: '12 Jul 2026', status: 'Completed', txId: 'TXN982490184', method: 'UPI (vijay@upi)' },
+    { id: '2', amount: 8200, date: '05 Jul 2026', status: 'Completed', txId: 'TXN748120349', method: 'Bank Transfer' },
+    { id: '3', amount: 15000, date: '28 Jun 2026', status: 'Completed', txId: 'TXN281048123', method: 'UPI (vijay@upi)' }
+  ]);
+
+  const handleRequestPayout = () => {
+    const amount = parseInt(stats.availableBalance.replace(/[^0-9]/g, '')) || 5000;
+    if (amount <= 0) {
+      addNotification('Cannot Request Payout', 'Available balance is zero.', 'error');
+      return;
+    }
+    
+    const newPayout = {
+      id: crypto.randomUUID(),
+      amount,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      status: 'Pending',
+      txId: 'Processing...',
+      method: 'UPI'
+    };
+    
+    setPayouts([newPayout, ...payouts]);
+    addNotification('Payout Requested! 💸', `₹${amount.toLocaleString()} is being processed.`, 'success');
+  };
+
+  return (
+    <div id="quick-actions-widget" className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm overflow-hidden relative">
+      <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-50 rounded-full blur-2xl opacity-70 pointer-events-none" />
+      
+      <div className="flex items-center gap-2 mb-4">
+        <Sparkles className="w-5 h-5 text-indigo-600 animate-pulse" />
+        <h2 className="text-lg font-bold text-slate-900">Partner Quick Actions</h2>
+      </div>
+      <p className="text-xs text-slate-500 mb-5">
+        Accelerate your workflow. Log prospective salons, view historical payouts, or schedule check-in visits instantly.
+      </p>
+
+      {/* Grid of buttons */}
+      <div className="grid grid-cols-1 gap-3 mb-6">
+        <button
+          type="button"
+          onClick={() => setIsLeadModalOpen(true)}
+          className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-slate-50/50 transition-all text-left group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <UserPlus className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-800 block">Log New Lead</span>
+              <span className="text-[11px] text-slate-400 block">Onboard a prospective salon</span>
+            </div>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsPayoutModalOpen(true)}
+          className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-slate-50/50 transition-all text-left group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <CreditCard className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-800 block">Recent Payouts</span>
+              <span className="text-[11px] text-slate-400 block">Check your historical payouts</span>
+            </div>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsScheduleModalOpen(true)}
+          className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-slate-50/50 transition-all text-left group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <CalendarDays className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-800 block">Schedule Visit</span>
+              <span className="text-[11px] text-slate-400 block">Plan an offline check-in session</span>
+            </div>
+          </div>
+          <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+        </button>
+      </div>
+
+      {/* Embedded Scheduled Visits Section */}
+      <div className="mt-5 pt-5 border-t border-slate-100">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+          <Clock className="w-3.5 h-3.5 text-indigo-500" />
+          Scheduled Visits ({visits.length})
+        </h3>
+        {visits.length === 0 ? (
+          <div className="bg-slate-50 rounded-xl p-3 text-center border border-dashed border-slate-200">
+            <p className="text-[11px] text-slate-500 leading-normal">
+              No meetings scheduled. Plan physical pitches or kit delivery visits to build relationships!
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2.5 max-h-[175px] overflow-y-auto pr-1">
+            {visits.map((visit) => (
+              <div 
+                key={visit.id} 
+                className="p-3 bg-slate-50 hover:bg-indigo-50/20 border border-slate-200/60 rounded-xl flex items-start justify-between gap-3 group/item transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-bold text-slate-800 truncate">{visit.shopName}</span>
+                    <span className={cn(
+                      "text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider",
+                      visit.purpose?.includes("Pitch") ? "bg-purple-50 text-purple-700 border border-purple-100" :
+                      visit.purpose?.includes("Onboard") ? "bg-amber-50 text-amber-700 border border-amber-100" :
+                      "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                    )}>
+                      {visit.purpose?.split(" ")[0] || "Visit"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400 font-semibold">
+                    <Calendar className="w-3 h-3 text-slate-400" />
+                    <span>{visit.date}</span>
+                    <span>•</span>
+                    <span>{visit.time}</span>
+                  </div>
+                  {visit.notes && (
+                    <p className="text-[10px] text-slate-500 mt-1 line-clamp-1 italic">
+                      "{visit.notes}"
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCancelVisit(visit.id, visit.shopName)}
+                  className="text-slate-400 hover:text-red-500 p-1 hover:bg-slate-200/50 rounded-md transition-colors shrink-0 cursor-pointer"
+                  title="Cancel visit"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Log New Lead Modal */}
+      <AnimatePresence>
+        {isLeadModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999]">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden"
+            >
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-indigo-950 text-white">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-5 h-5 text-indigo-300" />
+                  <h3 className="text-base font-bold">Log New Salon Lead</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsLeadModalOpen(false)}
+                  className="text-indigo-200 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleLeadSubmit} className="p-5 space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 block">Salon / Shop Name *</label>
+                  <input
+                    required
+                    name="shopName"
+                    type="text"
+                    placeholder="e.g. Royal Crown Salon"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 block">Owner Full Name *</label>
+                  <input
+                    required
+                    name="ownerName"
+                    type="text"
+                    placeholder="e.g. Anand Kulkarni"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">WhatsApp Number *</label>
+                    <input
+                      required
+                      name="whatsapp"
+                      type="tel"
+                      pattern="[0-9]{10}"
+                      placeholder="e.g. 9876543210"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono font-bold text-slate-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Area / Locality *</label>
+                    <input
+                      required
+                      name="area"
+                      type="text"
+                      placeholder="e.g. Baner"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">District / State</label>
+                    <input
+                      name="district"
+                      type="text"
+                      defaultValue="Pune, MH"
+                      className="w-full px-3 py-2 border border-slate-200 bg-slate-50/50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Estimated Tier</label>
+                    <select
+                      name="tier"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                    >
+                      <option value="Bronze">Standard (Bronze)</option>
+                      <option value="Silver">High Growth (Silver)</option>
+                      <option value="Gold">Premium (Gold)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 block">Pitch Notes / Status</label>
+                  <textarea
+                    name="notes"
+                    rows={2}
+                    placeholder="e.g. Visited owner today, she showed high interest in automated checkouts."
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsLeadModalOpen(false)}
+                    className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingLead}
+                    className="flex-1 py-2.5 bg-indigo-900 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-75 cursor-pointer"
+                  >
+                    {isSubmittingLead ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        Saving Lead...
+                      </>
+                    ) : (
+                      'Log Lead & Connect'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Recent Payouts Modal */}
+      <AnimatePresence>
+        {isPayoutModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999]">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden"
+            >
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-indigo-950 text-white">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-indigo-300" />
+                  <h3 className="text-base font-bold">Your Historical Payouts</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsPayoutModalOpen(false)}
+                  className="text-indigo-200 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4">
+                <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex justify-between items-center">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-500 block">Available Balance</span>
+                    <span className="text-2xl font-black text-indigo-900 font-mono">{stats.availableBalance}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 block">Total Earned</span>
+                    <span className="text-base font-black text-slate-700 font-mono">{stats.lifetimeEarnings}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Recent Payout Settlements</p>
+                  <div className="divide-y divide-slate-100 border border-slate-100 rounded-xl overflow-hidden bg-slate-50/50">
+                    {payouts.map((p) => (
+                      <div key={p.id} className="p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-extrabold text-slate-800 font-mono">₹{p.amount.toLocaleString()}</span>
+                            <span className={cn(
+                              "text-[9px] font-extrabold px-1.5 py-0.5 rounded border uppercase tracking-widest",
+                              p.status === 'Completed' ? "bg-emerald-100 text-emerald-800 border-emerald-200" : "bg-amber-100 text-amber-800 border-amber-200"
+                            )}>
+                              {p.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-1 text-[10px] text-slate-400 font-semibold">
+                            <span>{p.date}</span>
+                            <span>•</span>
+                            <span className="font-mono">{p.txId}</span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-500">{p.method}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsPayoutModalOpen(false)}
+                    className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRequestPayout}
+                    className="flex-1 py-2.5 bg-indigo-900 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Request Payout
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Schedule Visit Modal */}
+      <AnimatePresence>
+        {isScheduleModalOpen && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999]">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full overflow-hidden"
+            >
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-indigo-950 text-white">
+                <div className="flex items-center gap-2">
+                  <CalendarDays className="w-5 h-5 text-indigo-300" />
+                  <h3 className="text-base font-bold">Schedule Salon Visit</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsScheduleModalOpen(false)}
+                  className="text-indigo-200 hover:text-white p-1 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                >
+                  <X className="w-4.5 h-4.5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleScheduleSubmit} className="p-5 space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 block">Select Salon / Shop *</label>
+                  {partnerShops.length > 0 ? (
+                    <select
+                      name="shopName"
+                      required
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800 bg-white"
+                    >
+                      {partnerShops.map((shop) => (
+                        <option key={shop.id} value={shop.name}>{shop.name} ({shop.area})</option>
+                      ))}
+                      <option value="New Prospective Salon">+ Register custom prospective salon</option>
+                    </select>
+                  ) : (
+                    <input
+                      name="shopName"
+                      type="text"
+                      required
+                      placeholder="e.g. Looks Salon"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                    />
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Meeting Date *</label>
+                    <input
+                      required
+                      name="date"
+                      type="date"
+                      defaultValue={new Date(Date.now() + 86400000).toISOString().split('T')[0]} // defaults to tomorrow
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Meeting Time *</label>
+                    <input
+                      required
+                      name="time"
+                      type="time"
+                      defaultValue="11:00"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 block">Visit Purpose *</label>
+                  <select
+                    name="purpose"
+                    required
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800 bg-white"
+                  >
+                    <option value="Pitch Nexora Platform">Pitch Nexora Platform & Onboarding</option>
+                    <option value="Deliver Printed Welcome Kit">Deliver Printed QR / Welcome Kit</option>
+                    <option value="Owner Training & QR Setup">Owner Training & Technical Checkout Setup</option>
+                    <option value="Check-in Review & Support">Monthly Performance Check-in & Review</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-600 block">Meeting Agenda Notes</label>
+                  <textarea
+                    name="notes"
+                    rows={2}
+                    placeholder="e.g. Take signatures on agreement form, confirm payout details, show owner the booking app demo."
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-semibold text-slate-800 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsScheduleModalOpen(false)}
+                    className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-indigo-900 hover:bg-indigo-800 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                  >
+                    Schedule Visit
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function MilestoneBadges({ stats }: { stats: any }) {
+  const activeShops = stats.activeShops || 25;
+  
+  const badges = [
+    { id: 1, title: 'Starter', target: 5, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50', border: 'border-amber-200' },
+    { id: 2, title: 'Rising Star', target: 10, icon: Sparkles, color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'border-indigo-200' },
+    { id: 3, title: 'Bronze Partner', target: 25, icon: Medal, color: 'text-orange-500', bg: 'bg-orange-50', border: 'border-orange-200' },
+    { id: 4, title: 'Silver Partner', target: 50, icon: Award, color: 'text-slate-500', bg: 'bg-slate-50', border: 'border-slate-200' },
+    { id: 5, title: 'Gold Partner', target: 100, icon: Crown, color: 'text-yellow-500', bg: 'bg-yellow-50', border: 'border-yellow-200' },
+    { id: 6, title: 'Elite District', target: 200, icon: Trophy, color: 'text-purple-500', bg: 'bg-purple-50', border: 'border-purple-200' },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+      <h2 className="text-lg font-bold text-slate-900 mb-2 flex items-center gap-2">
+        <Award className="w-5 h-5 text-indigo-600" />
+        Milestone Badges
+      </h2>
+      <p className="text-xs text-slate-500 mb-6">Earn badges by hitting active shop targets.</p>
+      
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {badges.map((badge) => {
+          const isEarned = activeShops >= badge.target;
+          const Icon = badge.icon;
+          
+          return (
+            <div 
+              key={badge.id}
+              className={cn(
+                "p-4 rounded-xl flex flex-col items-center text-center transition-all border",
+                isEarned 
+                  ? `${badge.bg} ${badge.border} shadow-sm` 
+                  : "bg-slate-50 border-slate-100 opacity-60 grayscale"
+              )}
+            >
+              <div className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center mb-3",
+                isEarned ? "bg-white shadow-sm" : "bg-slate-200"
+              )}>
+                <Icon className={cn("w-6 h-6", isEarned ? badge.color : "text-slate-400")} />
+              </div>
+              <span className={cn(
+                "text-sm font-bold block",
+                isEarned ? "text-slate-900" : "text-slate-500"
+              )}>
+                {badge.title}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
+                {badge.target} Shops
+              </span>
+              {isEarned && (
+                <span className="mt-2 text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  Earned
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

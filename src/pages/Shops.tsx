@@ -4,6 +4,7 @@ import { cn } from '../lib/utils';
 import { supabase } from '../lib/supabase';
 import ShopMap from '../components/ShopMap';
 import { calculateDistance, formatDistance } from '../utils/distance';
+import InfoTooltip from '../components/Tooltip';
 
 const GOOGLE_MAPS_KEY = process.env.GOOGLE_MAPS_PLATFORM_KEY || '';
 
@@ -351,7 +352,10 @@ export default function Shops({ coords }: { coords: { latitude: number; longitud
       {showAddForm && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-bold text-slate-900">Board New Shop</h2>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              Board New Shop
+              <InfoTooltip content="Keep the salon's GST or PAN details handy for faster verification by our team." position="right" />
+            </h2>
             <button onClick={() => setShowAddForm(false)} className="text-slate-400 hover:text-slate-600">Close</button>
           </div>
           
@@ -470,8 +474,18 @@ export default function Shops({ coords }: { coords: { latitude: number; longitud
                   <th className="px-6 py-4">Shop Details</th>
                   <th className="px-6 py-4">Location</th>
                   <th className="px-6 py-4">Onboarded On</th>
-                  <th className="px-6 py-4">Status Checklist</th>
-                  <th className="px-6 py-4">Revenue & Commission</th>
+                  <th className="px-6 py-4">
+                    <div className="flex items-center gap-1">
+                      Status Checklist
+                      <InfoTooltip content="An active shop needs verified KYC, a live website, and QR mapping to complete 5+ weekly transactions." position="top" />
+                    </div>
+                  </th>
+                  <th className="px-6 py-4">
+                    <div className="flex items-center gap-1">
+                      Revenue & Commission
+                      <InfoTooltip content="Train salon staff to process all bookings through the Nexora QR to boost your platform revenue." position="top" />
+                    </div>
+                  </th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>

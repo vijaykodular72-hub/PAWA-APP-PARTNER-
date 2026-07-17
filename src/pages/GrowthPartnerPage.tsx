@@ -103,8 +103,7 @@ export default function GrowthPartnerPage() {
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">Nexora</span>
-            <span className="text-xl font-light text-slate-400 hidden sm:inline">Partner</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">Nexora SalonOS</span>
           </div>
           <div className="flex items-center space-x-2 sm:space-x-4">
             <NotificationCenter />
@@ -135,16 +134,24 @@ export default function GrowthPartnerPage() {
             Salary Nahi. <br />
             <span className="bg-gradient-to-r from-indigo-300 via-purple-300 to-indigo-300 bg-clip-text text-transparent">Growth Share.</span>
           </h1>
-          <p className="text-xl text-indigo-100/80 mb-10 leading-relaxed max-w-2xl mx-auto">
-            Leverage your beauty industry network. Onboard salons, activate their business, and build long-term wealth with Nexora.
+          <p className="text-xl text-indigo-100/80 mb-6 leading-relaxed max-w-2xl mx-auto">
+            Beauty industry me apna network use karo, salons onboard karo, aur Nexora ke saath long-term growth banao.
           </p>
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl py-4 px-6 inline-block mb-10 shadow-xl">
+             <p className="text-2xl font-medium text-white tracking-wide italic">
+               "Salon Ja Rahe Ho? Nexora Kiya Kya?"
+             </p>
+             <p className="text-sm text-indigo-200 mt-2 font-semibold uppercase tracking-widest">
+               India's Beauty Industry Operating System
+             </p>
+          </div>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
             {!loadingAuth && (
               <Link
                 to="/partner/dashboard"
                 className="w-full sm:w-auto px-8 py-4 bg-white text-indigo-900 rounded-full font-bold text-lg hover:bg-indigo-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center group"
               >
-                {user ? 'Go to Dashboard' : 'Login to Dashboard'}
+                {user ? 'Go to Dashboard' : 'Apply as Growth Partner'}
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
@@ -160,9 +167,9 @@ export default function GrowthPartnerPage() {
           </div>
           
           <div className="mt-14 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm font-medium text-indigo-100/70">
-            <span className="flex items-center"><CheckCircle2 className="w-4.5 h-4.5 mr-2 text-indigo-400" /> Zero Joining Fee</span>
+            <span className="flex items-center"><CheckCircle2 className="w-4.5 h-4.5 mr-2 text-indigo-400" /> Free Joining</span>
             <span className="flex items-center"><CheckCircle2 className="w-4.5 h-4.5 mr-2 text-indigo-400" /> No Investment</span>
-            <span className="flex items-center"><CheckCircle2 className="w-4.5 h-4.5 mr-2 text-indigo-400" /> Weekly Payouts</span>
+            <span className="flex items-center"><CheckCircle2 className="w-4.5 h-4.5 mr-2 text-indigo-400" /> Weekly Payout</span>
             <span className="flex items-center"><CheckCircle2 className="w-4.5 h-4.5 mr-2 text-indigo-400" /> Transparent Dashboard</span>
           </div>
         </motion.div>
@@ -176,13 +183,13 @@ export default function GrowthPartnerPage() {
             <p className="mt-4 text-lg text-slate-500">The most transparent and lucrative partner program in the beauty industry.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            <BenefitCard icon={Wallet} title="No Joining Fee" desc="Start your journey with zero upfront costs or hidden charges." delay={0.1} />
-            <BenefitCard icon={Briefcase} title="Zero Investment" desc="You invest your time and network, not your capital." delay={0.2} />
+            <BenefitCard icon={Wallet} title="Joining Fee Nahi" desc="Start your journey with zero upfront costs." delay={0.1} />
+            <BenefitCard icon={Briefcase} title="Investment Nahi" desc="You invest your time and network, not your capital." delay={0.2} />
             <BenefitCard icon={BookOpen} title="Free Training" desc="Comprehensive sales and product training provided." delay={0.3} />
             <BenefitCard icon={TrendingUp} title="Weekly Payout" desc="Automated weekly settlements directly to your bank." delay={0.4} />
             <BenefitCard icon={MapPin} title="District Recognition" desc="Become the official Nexora partner for your district." delay={0.5} />
-            <BenefitCard icon={Award} title="Long-Term Share" desc="Earn recurring commission as long as the shop is active." delay={0.6} />
-            <BenefitCard icon={Store} title="Revenue Based" desc="Earn on actual platform revenue generated by shops." delay={0.7} />
+            <BenefitCard icon={Award} title="Long-Term Growth Share" desc="Earn recurring commission as long as the shop is active." delay={0.6} />
+            <BenefitCard icon={Store} title="Active Shops Par Earnings" desc="Earn on actual platform revenue generated by shops." delay={0.7} />
             <BenefitCard icon={Users} title="Milestone Rewards" desc="Unlock gadgets, vehicles, and premium rewards." delay={0.8} />
           </div>
         </div>
@@ -195,15 +202,19 @@ export default function GrowthPartnerPage() {
           <p className="mt-4 text-lg text-slate-500">A streamlined process to get you onboarded and earning quickly.</p>
         </div>
         
-        <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 relative">
             {/* Desktop connecting line */}
-            <div className="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-slate-100 via-indigo-100 to-slate-100" />
+            <div className="hidden lg:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-slate-100 via-indigo-100 to-slate-100" />
             
-            <StepCard number="1" title="Login" desc="Login using your Nexora credentials." icon={FileCheck} />
-            <StepCard number="2" title="Verification" desc="Complete your profile and KYC." icon={ShieldCheck} />
-            <StepCard number="3" title="Training" desc="Complete our short certification module." icon={BookOpen} />
-            <StepCard number="4" title="Start Earning" desc="Dashboard activated. Begin onboarding." icon={Rocket} />
+            <StepCard number="1" title="Apply" desc="Submit your application." icon={FileCheck} />
+            <StepCard number="2" title="Mobile Verification" desc="Verify your identity." icon={Smartphone} />
+            <StepCard number="3" title="KYC Upload" desc="Upload required documents." icon={ShieldCheck} />
+            <StepCard number="4" title="District Selection" desc="Choose your target area." icon={MapPin} />
+            <StepCard number="5" title="Training Complete" desc="Finish the short module." icon={BookOpen} />
+            <StepCard number="6" title="Admin Approval" desc="Wait for verification." icon={UserIcon} />
+            <StepCard number="7" title="Dashboard Activated" desc="Access your partner panel." icon={LayoutDashboard} />
+            <StepCard number="8" title="Start Onboarding Salons" desc="Begin your journey." icon={Rocket} />
           </div>
         </div>
       </section>
@@ -448,14 +459,14 @@ export default function GrowthPartnerPage() {
         <div className="max-w-[1600px] mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 tracking-tight text-slate-900">Partner Responsibilities</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 tracking-tight text-slate-900">Partner ka kaam</h2>
               <ul className="space-y-6">
                 {[
-                  "Explain the Nexora platform value to salon owners.",
-                  "Assist with shop onboarding and profile setup.",
-                  "Help set up digital catalogs and service menus.",
-                  "Train staff on QR and payment collection processes.",
-                  "Foster shops to become active, revenue-generating businesses."
+                  "Salon owners ko Nexora explain karna",
+                  "Shop onboarding karwana",
+                  "Website setup me help karna",
+                  "QR/payment system samjhana",
+                  "Shop ko active revenue-generating business banana"
                 ].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <div className="flex-shrink-0 mt-1">
@@ -472,13 +483,13 @@ export default function GrowthPartnerPage() {
             <div className="bg-white rounded-[2rem] p-8 lg:p-12 border border-slate-200 shadow-lg shadow-slate-200/50">
                <h3 className="text-2xl font-bold mb-8 text-slate-900 flex items-center">
                  <ShieldCheck className="w-8 h-8 mr-3 text-red-500" />
-                 Strict Guidelines
+                 Important Guidelines
                </h3>
                <ul className="space-y-4">
                  {[
-                   "Partners must NEVER collect cash on behalf of Nexora.",
-                   "Partners are independent contractors, not salaried employees.",
-                   "Do not make false promises or guarantees to salon owners."
+                   "Partner cash collect nahi karega.",
+                   "Partner salary employee nahi hoga.",
+                   "Partner fake promise nahi karega."
                  ].map((item, i) => (
                    <li key={i} className="flex items-center space-x-4 bg-red-50/50 p-4 rounded-2xl border border-red-100">
                      <div className="w-2 h-2 rounded-full bg-red-500 flex-shrink-0" />
@@ -500,30 +511,36 @@ function BenefitCard({ icon: Icon, title, desc, delay }: { icon: LucideIcon, tit
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
+      viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay }}
-      className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:border-indigo-100 transition-all group"
+      className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 group"
     >
-      <div className="w-14 h-14 bg-slate-50 group-hover:bg-indigo-50 text-slate-600 group-hover:text-indigo-600 rounded-2xl flex items-center justify-center mb-6 transition-colors border border-slate-100 group-hover:border-indigo-100">
-        <Icon className="w-7 h-7" />
+      <div className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-50 group-hover:bg-indigo-50 text-slate-600 group-hover:text-indigo-600 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 transition-colors border border-slate-100 group-hover:border-indigo-100">
+        <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
       </div>
-      <h3 className="text-lg font-bold text-slate-900 mb-2">{title}</h3>
-      <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
+      <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2">{title}</h3>
+      <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">{desc}</p>
     </motion.div>
   );
 }
 
 function StepCard({ number, title, desc, icon: Icon }: { number: string, title: string, desc: string, icon: LucideIcon }) {
   return (
-    <div className="relative pt-8 md:pt-12 text-center group">
-      <div className="w-20 h-20 mx-auto bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm relative z-10 group-hover:border-indigo-200 group-hover:shadow-md transition-all">
-        <div className="absolute -top-3 -right-3 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-sm ring-4 ring-white">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, delay: parseInt(number) * 0.1 }}
+      className="relative pt-6 md:pt-12 text-center group cursor-pointer"
+    >
+      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center mb-4 sm:mb-6 shadow-sm relative z-10 group-hover:border-indigo-200 group-hover:shadow-md group-hover:-translate-y-1 group-hover:scale-105 transition-all duration-300">
+        <div className="absolute -top-3 -right-3 w-6 h-6 sm:w-8 sm:h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shadow-sm ring-4 ring-white">
           {number}
         </div>
-        <Icon className="w-8 h-8 text-slate-400 group-hover:text-indigo-600 transition-colors" />
+        <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400 group-hover:text-indigo-600 transition-colors" />
       </div>
-      <h3 className="font-bold text-slate-900 text-lg mb-2">{title}</h3>
-      <p className="text-sm text-slate-500 leading-relaxed max-w-[200px] mx-auto">{desc}</p>
-    </div>
+      <h3 className="font-bold text-slate-900 text-sm sm:text-lg mb-1 sm:mb-2">{title}</h3>
+      <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-[200px] mx-auto">{desc}</p>
+    </motion.div>
   );
 }

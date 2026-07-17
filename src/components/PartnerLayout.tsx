@@ -161,7 +161,7 @@ export default function PartnerLayout({ coords }: { coords: { latitude: number; 
       >
         <div className="h-16 flex items-center px-6 border-b border-slate-200">
           <Link to="/growth-partner" className="flex items-center">
-            <span className="text-xl font-bold tracking-tight text-indigo-900">Nexora</span>
+            <span className="text-xl font-bold tracking-tight text-indigo-900">Nexora SalonOS</span>
             <span className="text-xl font-light text-slate-500 ml-1">Partner</span>
           </Link>
         </div>

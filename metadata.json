@@ -1,6 +1,6 @@
 {
-  "name": "Nexora Growth Partner",
-  "description": "District Business Partner Program and Dashboard for Nexora SalonOS.",
+  "name": "Nexora SalonOS",
+  "description": "India's Beauty Industry Operating System. Includes the Nexora Growth Partner Program and Dashboard.",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
