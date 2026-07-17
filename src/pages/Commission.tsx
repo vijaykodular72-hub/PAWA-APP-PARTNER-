@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wallet, IndianRupee, Store, CheckCircle2, Clock, AlertCircle, TrendingUp, Filter, Download } from 'lucide-react';
+import { Wallet, IndianRupee, Store, CheckCircle2, Clock, AlertCircle, TrendingUp, Filter, Download, Calculator, ShieldCheck } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { cn } from '../lib/utils';
 
@@ -33,6 +33,14 @@ const recurringData = [
 export default function Commission() {
   const [activeTab, setActiveTab] = useState<'activation' | 'recurring'>('activation');
   const [chartView, setChartView] = useState<'all' | 'activation' | 'recurring'>('all');
+  const [numShops, setNumShops] = useState<number>(100);
+  const [dailyRev, setDailyRev] = useState<number>(100);
+  
+  // States for Recurring Growth Share Calculator
+  const [calcTab, setCalcTab] = useState<'activation' | 'recurring'>('activation');
+  const [recShops, setRecShops] = useState<number>(50);
+  const [recMonthlyPlatformRev, setRecMonthlyPlatformRev] = useState<number>(25000);
+  const [recMonth, setRecMonth] = useState<number>(4);
 
   // Calculate totals
   const totalActivation = monthlyEarningsData.reduce((sum, item) => sum + item.activation, 0);
@@ -246,6 +254,253 @@ export default function Commission() {
               )}
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Nexora Earning Model & Interactive Calculator */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Core Earning Policy Card */}
+        <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-6 border border-indigo-950/40 shadow-md flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-lg tracking-tight">Nexora Earning Model</h3>
+                <p className="text-xs text-indigo-200/70">Salary nahi, actual collection based share</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-slate-300 leading-relaxed mb-6">
+              Partner ko sirf uske dwara onboard ki gayi <span className="text-white font-bold underline decoration-indigo-400">verified, published, active aur revenue-generating</span> shops ke successful Nexora platform revenue par commission milega.
+            </p>
+
+            <div className="space-y-3.5 mb-6">
+              <div className="flex items-start gap-3 bg-white/5 border border-white/10 p-3.5 rounded-xl">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-300">No Collection = No Commission</h4>
+                  <p className="text-xs text-slate-300 mt-0.5 font-medium">Real sales transactions directly drive platform revenues and partner payouts.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 bg-white/5 border border-white/10 p-3.5 rounded-xl">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-300">Real Collection = Real Partner Earning</h4>
+                  <p className="text-xs text-slate-300 mt-0.5 font-medium">As long as salons perform online & home services, you build continuous wealth.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-indigo-200/80">
+            <span className="font-semibold tracking-wide italic">"Salary Nahi. Growth Share."</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest bg-indigo-500/20 px-2 py-1 rounded">SalonOS Policy</span>
+          </div>
+        </div>
+
+        {/* Dynamic Calculator Card */}
+        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                  <Calculator className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-slate-900">Interactive Partner Calculator</h3>
+                  <p className="text-xs text-slate-500">Salary Nahi, Growth Share live simulation</p>
+                </div>
+              </div>
+              
+              <div className="flex bg-slate-100 p-1 rounded-xl self-start sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => setCalcTab('activation')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                    calcTab === 'activation'
+                      ? "bg-white text-indigo-600 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  Activation
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCalcTab('recurring')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all",
+                    calcTab === 'recurring'
+                      ? "bg-white text-indigo-600 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  )}
+                >
+                  Recurring
+                </button>
+              </div>
+            </div>
+
+            {calcTab === 'activation' ? (
+              <>
+                <div className="grid sm:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Onboarded Shops</label>
+                      <span className="text-sm font-extrabold text-indigo-600">{numShops} shops</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="1" 
+                      max="500" 
+                      value={numShops} 
+                      onChange={(e) => setNumShops(Number(e.target.value))} 
+                      className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400">
+                      <span>1 shop</span>
+                      <span>500 shops</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Avg Daily Revenue/Shop</label>
+                      <span className="text-sm font-extrabold text-indigo-600">₹{dailyRev}</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="10" 
+                      max="1000" 
+                      step="10" 
+                      value={dailyRev} 
+                      onChange={(e) => setDailyRev(Number(e.target.value))} 
+                      className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+                    />
+                    <div className="flex justify-between text-[10px] text-slate-400">
+                      <span>₹10</span>
+                      <span>₹1,000/day</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">15-Day Revenue / Shop</p>
+                    <p className="text-lg font-black text-slate-800">₹{(dailyRev * 15).toLocaleString()}</p>
+                  </div>
+                  <div className="space-y-1 sm:border-x sm:border-slate-200">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Activation Share (10%)</p>
+                    <p className="text-lg font-black text-indigo-600">₹{Math.round(dailyRev * 15 * 0.1).toLocaleString()}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Estimated Total Earning</p>
+                    <p className="text-lg font-black text-emerald-600">₹{Math.round(dailyRev * 15 * 0.1 * numShops).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-slate-400 mt-4 leading-relaxed bg-slate-50 border border-dashed border-slate-200 rounded-xl p-3">
+                  <span className="font-semibold text-slate-600">Activation Rule:</span> Shop onboard hone par unke first 15 days ke active Nexora platform revenue par 10% one-time activation commission milega. Jaise agar 1 shop se ₹100/day revenue aata hai, to 15 days me ₹1,500 par ₹150 milega.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="grid sm:grid-cols-3 gap-4 mb-6">
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Shops</label>
+                      <span className="text-xs font-extrabold text-indigo-600">{recShops} shops</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="1" 
+                      max="500" 
+                      value={recShops} 
+                      onChange={(e) => setRecShops(Number(e.target.value))} 
+                      className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+                    />
+                    <div className="flex justify-between text-[9px] text-slate-400">
+                      <span>1</span>
+                      <span>500</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Mo. Platform Rev</label>
+                      <span className="text-xs font-extrabold text-indigo-600">₹{recMonthlyPlatformRev.toLocaleString()}</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="5000" 
+                      max="150000" 
+                      step="5000" 
+                      value={recMonthlyPlatformRev} 
+                      onChange={(e) => setRecMonthlyPlatformRev(Number(e.target.value))} 
+                      className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+                    />
+                    <div className="flex justify-between text-[9px] text-slate-400">
+                      <span>₹5k</span>
+                      <span>₹150k/mo</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Shop Month</label>
+                      <span className="text-xs font-extrabold text-indigo-600">Month {recMonth}</span>
+                    </div>
+                    <input 
+                      type="range" 
+                      min="1" 
+                      max="24" 
+                      value={recMonth} 
+                      onChange={(e) => setRecMonth(Number(e.target.value))} 
+                      className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" 
+                    />
+                    <div className="flex justify-between text-[9px] text-slate-400">
+                      <span>M1</span>
+                      <span>M24+</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Rates logic card */}
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Ladder Tier</p>
+                    <p className="text-xs font-black text-slate-800">
+                      {recMonth <= 6 ? 'First 6 Months' : recMonth <= 12 ? 'Month 7–12' : 'After 12 Months'}
+                    </p>
+                  </div>
+                  <div className="space-y-1 sm:border-l sm:border-slate-200">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Applicable Rate</p>
+                    <p className="text-lg font-black text-indigo-600">
+                      {recMonth <= 6 ? '10%' : recMonth <= 12 ? '5%' : '2%'}
+                    </p>
+                  </div>
+                  <div className="space-y-1 sm:border-l sm:border-slate-200">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Comm / Shop</p>
+                    <p className="text-lg font-black text-indigo-600">
+                      ₹{Math.round(recMonthlyPlatformRev * (recMonth <= 6 ? 0.1 : recMonth <= 12 ? 0.05 : 0.02)).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="space-y-1 sm:border-l sm:border-slate-200">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Monthly Earning</p>
+                    <p className="text-lg font-black text-emerald-600">
+                      ₹{Math.round(recMonthlyPlatformRev * (recMonth <= 6 ? 0.1 : recMonth <= 12 ? 0.05 : 0.02) * recShops).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-red-600 mt-4 leading-relaxed bg-red-50 border border-dashed border-red-100 rounded-xl p-3">
+                  <span className="font-semibold text-red-800">🚨 Critical Rule:</span> Ye commission Nexora ke **platform revenue** me se milega. Ye shop ke **total bill amount** me se nahi milega. Platform revenue represent the actual fees Nexora captures, making this a highly sustainable and legitimate growth sharing model.
+                </p>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

@@ -17,6 +17,7 @@ import laptopImg from '../assets/images/laptop_reward_1783078062332.jpg';
 import carImg from '../assets/images/car_reward_1783078073354.jpg';
 import InfoTooltip from '../components/Tooltip';
 import BoardShopModal from '../components/BoardShopModal';
+import PartnerOnboardingChecklist from '../components/PartnerOnboardingChecklist';
 
 const chartData = [
   { name: 'Mon', revenue: 4000 },
@@ -244,6 +245,9 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
           </button>
         </div>
       </div>
+
+      {/* Partner Onboarding Checklist */}
+      <PartnerOnboardingChecklist />
 
       {/* Payouts & Balances */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
