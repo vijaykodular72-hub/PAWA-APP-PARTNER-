@@ -1,5 +1,6 @@
 import { BookOpen, Video, FileText, CheckCircle2 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import ResourceLibrary from '../components/ResourceLibrary';
 
 const modules = [
   { id: 1, title: 'Nexora Introduction', category: 'Basics', type: 'video', duration: '5 min', completed: true },
@@ -25,8 +26,8 @@ export default function Training() {
         {modules.map(module => (
           <div key={module.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
              <div className={cn(
-               "h-32 p-6 flex flex-col justify-end relative",
-               module.type === 'video' ? "bg-indigo-900" : "bg-slate-800"
+                "h-32 p-6 flex flex-col justify-end relative",
+                module.type === 'video' ? "bg-indigo-900" : "bg-slate-800"
              )}>
                 <div className="absolute top-4 right-4 flex gap-2">
                   <span className="bg-white/20 text-white backdrop-blur-md px-2 py-1 text-xs font-medium rounded-md">
@@ -41,21 +42,24 @@ export default function Training() {
                 {module.type === 'video' ? <Video className="w-8 h-8 text-white/50 mb-2" /> : <FileText className="w-8 h-8 text-white/50 mb-2" />}
              </div>
              <div className="p-5 flex-1 flex flex-col">
-               <h3 className="text-lg font-bold text-slate-900 mb-2">{module.title}</h3>
-               <div className="flex items-center text-slate-500 text-sm mt-auto">
-                 <BookOpen className="w-4 h-4 mr-2" />
-                 {module.duration} read/watch
-               </div>
-               <button className={cn(
-                 "mt-4 w-full py-2 rounded-xl text-sm font-medium transition-colors",
-                 module.completed ? "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100" : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
-               )}>
-                 {module.completed ? "Review Module" : "Start Learning"}
-               </button>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">{module.title}</h3>
+                <div className="flex items-center text-slate-500 text-sm mt-auto">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  {module.duration} read/watch
+                </div>
+                <button className={cn(
+                  "mt-4 w-full py-2 rounded-xl text-sm font-medium transition-colors",
+                  module.completed ? "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100" : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+                )}>
+                  {module.completed ? "Review Module" : "Start Learning"}
+                </button>
              </div>
           </div>
         ))}
       </div>
+
+      {/* Sales Collateral & Resource Library Component */}
+      <ResourceLibrary />
     </div>
   );
 }
