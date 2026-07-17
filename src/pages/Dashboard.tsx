@@ -20,6 +20,7 @@ import BoardShopModal from '../components/BoardShopModal';
 import PartnerOnboardingChecklist from '../components/PartnerOnboardingChecklist';
 import OnboardingHeatmap from '../components/OnboardingHeatmap';
 import KPISummary from '../components/KPISummary';
+import { exportDashboardToPDF } from '../utils/pdfExport';
 
 const chartData = [
   { name: 'Mon', revenue: 4000 },
@@ -241,11 +242,18 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
 
   const handleGenerateReport = () => {
     setIsGeneratingReport(true);
-    addNotification('Generating Report...', 'Compiling your growth and leaderboard stats.', 'info');
+    addNotification('Generating Report...', 'Compiling your growth and performance metrics.', 'info');
     setTimeout(() => {
-      setIsGeneratingReport(false);
-      addNotification('Report Generated! 📄', 'Your monthly growth and leaderboard report is ready.', 'success');
-    }, 2000);
+      try {
+        exportDashboardToPDF(stats);
+        setIsGeneratingReport(false);
+        addNotification('Report Exported! 📄', 'Your offline PDF report has been downloaded successfully.', 'success');
+      } catch (error) {
+        console.error('Failed to export PDF:', error);
+        setIsGeneratingReport(false);
+        addNotification('Export Failed ❌', 'There was an error generating your PDF.', 'error');
+      }
+    }, 1500);
   };
 
   return (
