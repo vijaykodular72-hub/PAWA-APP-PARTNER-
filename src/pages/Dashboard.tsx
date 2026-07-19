@@ -174,6 +174,17 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
   }, []);
 
   const [shopDistances, setShopDistances] = useState<Record<string, number>>({});
+  const [leaderboardTab, setLeaderboardTab] = useState<'district' | 'national'>('district');
+  const [leaderboardData, setLeaderboardData] = useState([
+    { id: 1, name: "Rajesh Sharma", district: "Mumbai City, MH", activeShops: 245, growth: "+18%", tier: "Elite", isCurrentUser: false, cheers: 12, scope: "national" },
+    { id: 2, name: "Amit Patel", district: "Pune Central, MH", activeShops: 182, growth: "+14%", tier: "Gold", isCurrentUser: false, cheers: 8, scope: "both" }, // is in Pune
+    { id: 3, name: "Priya Nair", district: "Thane West, MH", activeShops: 120, growth: "+11%", tier: "Gold", isCurrentUser: false, cheers: 5, scope: "national" },
+    { id: 4, name: "Ananya Gupta", district: "Nashik Metro, MH", activeShops: 85, growth: "+8%", tier: "Silver", isCurrentUser: false, cheers: 2, scope: "national" },
+    { id: 6, name: "Rohan Deshmukh", district: "Kothrud, Pune, MH", activeShops: 42, growth: "+19%", tier: "Silver", isCurrentUser: false, cheers: 14, scope: "district" },
+    { id: 7, name: "Sneha Kulkarni", district: "Viman Nagar, Pune, MH", activeShops: 31, growth: "+15%", tier: "Bronze", isCurrentUser: false, cheers: 9, scope: "district" },
+    { id: 8, name: "Nikhil Shinde", district: "Wakad, Pune, MH", activeShops: 18, growth: "+10%", tier: "Bronze", isCurrentUser: false, cheers: 3, scope: "district" },
+  ]);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   useEffect(() => {
     if (!coords || nearbyShops.length === 0 || !GOOGLE_MAPS_KEY) return;
@@ -208,17 +219,6 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
   }
 
   // Dynamic Leaderboard Calculation
-  const [leaderboardTab, setLeaderboardTab] = useState<'district' | 'national'>('district');
-  const [leaderboardData, setLeaderboardData] = useState([
-    { id: 1, name: "Rajesh Sharma", district: "Mumbai City, MH", activeShops: 245, growth: "+18%", tier: "Elite", isCurrentUser: false, cheers: 12, scope: "national" },
-    { id: 2, name: "Amit Patel", district: "Pune Central, MH", activeShops: 182, growth: "+14%", tier: "Gold", isCurrentUser: false, cheers: 8, scope: "both" }, // is in Pune
-    { id: 3, name: "Priya Nair", district: "Thane West, MH", activeShops: 120, growth: "+11%", tier: "Gold", isCurrentUser: false, cheers: 5, scope: "national" },
-    { id: 4, name: "Ananya Gupta", district: "Nashik Metro, MH", activeShops: 85, growth: "+8%", tier: "Silver", isCurrentUser: false, cheers: 2, scope: "national" },
-    { id: 6, name: "Rohan Deshmukh", district: "Kothrud, Pune, MH", activeShops: 42, growth: "+19%", tier: "Silver", isCurrentUser: false, cheers: 14, scope: "district" },
-    { id: 7, name: "Sneha Kulkarni", district: "Viman Nagar, Pune, MH", activeShops: 31, growth: "+15%", tier: "Bronze", isCurrentUser: false, cheers: 9, scope: "district" },
-    { id: 8, name: "Nikhil Shinde", district: "Wakad, Pune, MH", activeShops: 18, growth: "+10%", tier: "Bronze", isCurrentUser: false, cheers: 3, scope: "district" },
-  ]);
-
   const currentUserActiveShops = stats.activeShops || 25; // fallback to 25 to match Milestones simulation
   const partnerData = {
     id: 5,
@@ -255,8 +255,6 @@ export default function Dashboard({ coords }: { coords: { latitude: number; long
     setLeaderboardData(prev => prev.map(p => p.id === id ? { ...p, cheers: p.cheers + 1 } : p));
     addNotification('Cheer Sent! 👏', 'You encouraged a fellow partner.', 'success');
   };
-
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   const handleGenerateReport = () => {
     setIsGeneratingReport(true);

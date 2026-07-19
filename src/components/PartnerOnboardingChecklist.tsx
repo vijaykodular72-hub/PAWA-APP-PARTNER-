@@ -18,6 +18,7 @@ import {
   UserCheck,
   Check
 } from 'lucide-react';
+import PartnerKYCUpload from './PartnerKYCUpload';
 
 interface ChecklistState {
   profileSetup: boolean;
@@ -73,6 +74,17 @@ export default function PartnerOnboardingChecklist() {
   const saveState = (newState: ChecklistState) => {
     setState(newState);
     localStorage.setItem('nexora_onboarding_state', JSON.stringify(newState));
+  };
+
+  const refreshOnboardingState = () => {
+    const saved = localStorage.getItem('nexora_onboarding_state');
+    if (saved) {
+      try {
+        setState(JSON.parse(saved));
+      } catch (e) {
+        console.error('Error parsing onboarding state', e);
+      }
+    }
   };
 
   // Compute overall percentage
@@ -382,135 +394,8 @@ export default function PartnerOnboardingChecklist() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden border-t border-slate-50 bg-slate-50/50"
               >
-                <div className="p-5 space-y-4">
-                  <p className="text-xs text-slate-500">
-                    Your commissions require verified PAN and Bank status for direct credit every Monday. Standard verification takes 24 hours.
-                  </p>
-                  
-                  <div className="grid sm:grid-cols-3 gap-4">
-                    {/* PAN Upload */}
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-700">PAN Card</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Required for taxation & compliance</p>
-                      </div>
-                      
-                      {state.panCardName ? (
-                        <div className="mt-4 p-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[10px] font-bold flex items-center justify-between gap-1 overflow-hidden">
-                          <span className="truncate">{state.panCardName}</span>
-                          <Check className="w-3.5 h-3.5 flex-shrink-0" />
-                        </div>
-                      ) : kycProgress.pan !== undefined ? (
-                        <div className="mt-4 space-y-1">
-                          <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                            <span>Uploading...</span>
-                            <span>{kycProgress.pan}%</span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${kycProgress.pan}%` }} />
-                          </div>
-                        </div>
-                      ) : (
-                        <label className="mt-4 flex items-center justify-center gap-1.5 border border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50 text-indigo-700 px-3 py-2.5 rounded-lg text-xs font-bold cursor-pointer transition-all">
-                          <Upload className="w-3.5 h-3.5" />
-                          Upload PAN
-                          <input 
-                            type="file" 
-                            accept=".pdf,image/*" 
-                            className="hidden" 
-                            onChange={(e) => {
-                              const name = e.target.files?.[0]?.name || 'pan_card.jpg';
-                              handleFileUpload('pan', name);
-                            }}
-                          />
-                        </label>
-                      )}
-                    </div>
-
-                    {/* Aadhaar Upload */}
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-700">Aadhaar Card</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Required for address verification</p>
-                      </div>
-                      
-                      {state.aadhaarName ? (
-                        <div className="mt-4 p-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[10px] font-bold flex items-center justify-between gap-1 overflow-hidden">
-                          <span className="truncate">{state.aadhaarName}</span>
-                          <Check className="w-3.5 h-3.5 flex-shrink-0" />
-                        </div>
-                      ) : kycProgress.aadhaar !== undefined ? (
-                        <div className="mt-4 space-y-1">
-                          <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                            <span>Uploading...</span>
-                            <span>{kycProgress.aadhaar}%</span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${kycProgress.aadhaar}%` }} />
-                          </div>
-                        </div>
-                      ) : (
-                        <label className="mt-4 flex items-center justify-center gap-1.5 border border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50 text-indigo-700 px-3 py-2.5 rounded-lg text-xs font-bold cursor-pointer transition-all">
-                          <Upload className="w-3.5 h-3.5" />
-                          Upload Aadhaar
-                          <input 
-                            type="file" 
-                            accept=".pdf,image/*" 
-                            className="hidden" 
-                            onChange={(e) => {
-                              const name = e.target.files?.[0]?.name || 'aadhaar_card.jpg';
-                              handleFileUpload('aadhaar', name);
-                            }}
-                          />
-                        </label>
-                      )}
-                    </div>
-
-                    {/* Bank Upload */}
-                    <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-700">Bank Details</h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Cancelled cheque or bank statement</p>
-                      </div>
-                      
-                      {state.bankDetailsName ? (
-                        <div className="mt-4 p-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[10px] font-bold flex items-center justify-between gap-1 overflow-hidden">
-                          <span className="truncate">{state.bankDetailsName}</span>
-                          <Check className="w-3.5 h-3.5 flex-shrink-0" />
-                        </div>
-                      ) : kycProgress.bank !== undefined ? (
-                        <div className="mt-4 space-y-1">
-                          <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                            <span>Uploading...</span>
-                            <span>{kycProgress.bank}%</span>
-                          </div>
-                          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${kycProgress.bank}%` }} />
-                          </div>
-                        </div>
-                      ) : (
-                        <label className="mt-4 flex items-center justify-center gap-1.5 border border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50 text-indigo-700 px-3 py-2.5 rounded-lg text-xs font-bold cursor-pointer transition-all">
-                          <Upload className="w-3.5 h-3.5" />
-                          Upload Passbook
-                          <input 
-                            type="file" 
-                            accept=".pdf,image/*" 
-                            className="hidden" 
-                            onChange={(e) => {
-                              const name = e.target.files?.[0]?.name || 'bank_statement.pdf';
-                              handleFileUpload('bank', name);
-                            }}
-                          />
-                        </label>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {state.kycUploaded && (
-                    <div className="mt-2 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 p-2.5 rounded-xl flex items-center gap-1.5 w-fit">
-                      <CheckCircle2 className="w-4 h-4" /> All KYC documents uploaded! Under verification.
-                    </div>
-                  )}
+                <div className="p-5">
+                  <PartnerKYCUpload onSuccess={refreshOnboardingState} />
                 </div>
               </motion.div>
             )}

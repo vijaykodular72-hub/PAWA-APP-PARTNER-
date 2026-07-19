@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Home from "./pages/Home";
 import GrowthPartnerPage from "./pages/GrowthPartnerPage";
 import PartnerLayout from "./components/PartnerLayout";
 import Dashboard from "./pages/Dashboard";
@@ -35,7 +36,7 @@ export default function App() {
       <Router>
         <div className={!isSupabaseConfigured ? "pt-10" : ""}>
           <Routes>
-            <Route path="/" element={<Navigate to="/growth-partner" replace />} />
+            <Route path="/" element={<Home />} />
             <Route path="/growth-partner" element={<GrowthPartnerPage />} />
             <Route path="/partner" element={<PartnerLayout coords={coords} />}>
               <Route index element={<Navigate to="/partner/dashboard" replace />} />
